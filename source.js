@@ -13,7 +13,7 @@ LuckyDog.prototype = {
     constructor: LuckyDog,
     createCard: function(){
         var card = document.createElement('div');
-        card.id = this.id;
+        card.id = this.name;
         card.className = 'card';
         card.style.backgroundColor = groupColor[this.groupId] + 1 + ')';
 
