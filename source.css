@@ -74,3 +74,17 @@ button:active {
     color: #000000;
     background-color: rgba(0,255,255,0.75);
 }
+
+input {
+    color: rgba(127,255,255,0.75);
+    background: transparent;
+    outline: 1px solid rgba(127,255,255,0.75);
+    border: 0px;
+    padding: 5px 10px;
+    cursor: pointer;
+    width: 10px;
+}
+
+span{
+    color: rgba(127,255,255,0.75);
+}
