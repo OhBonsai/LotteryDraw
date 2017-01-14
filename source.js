@@ -34,11 +34,11 @@ LuckyDog.prototype = {
         return curObj;
     },
     show: function(){
-        document.getElementById(this.id).style.display = '';
+        document.getElementById(this.name).style.display = '';
         this.object3D.visible = true;
     },
     hide: function(){
-        document.getElementById(this.id).style.display = 'none';
+        document.getElementById(this.name).style.display = 'none';
         this.object3D.visible = false;
         console.log(1);
     }
