@@ -15,7 +15,7 @@ animate();
 function init(){
     // init 3d env
     camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.z = 3000;
+    camera.position.z = 4000;
 
     scene = new THREE.Scene();
 
@@ -63,7 +63,7 @@ function init(){
         var curIndex = groupMark[entity[2]]++;
         var curGrid = entity[2];
         curObj.position.x = (curIndex%20)*140 - 1260;
-        curObj.position.y = curGrid*600 - parseInt(curIndex/20)*180;
+        curObj.position.y = curGrid*600 - parseInt(curIndex/20)*180 - 1000;
         targets.table.push(curObj)
     });
 
