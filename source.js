@@ -251,7 +251,7 @@ function initEvent(){
     window.addEventListener('resize', onWindowResize, false);
 
     document.getElementById('draw-list').addEventListener('click', function(){
-        luckyGroup.showDrawList();
+        //luckyGroup.showDrawList();
     }, false);
 
     document.getElementById('chaos').addEventListener('click', function(){
