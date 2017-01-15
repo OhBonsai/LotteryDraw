@@ -234,7 +234,7 @@ LuckyGroup.prototype = {
         this.unLuckyDogs.forEach(function(dog){curState.unLuckyDogs.push([dog.name, dog.id, dog.groupId])});
         this.luckyDogs.forEach(function(dog){curState.luckyDogs.push([dog.name, dog.id, dog.groupId])});
         this.newLuckyDogs.forEach(function(dog){curState.newLuckyDogs.push([dog.name, dog.id, dog.groupId])});
-        console.log(JSON.stringify(curState))
+        window.localStorage.bonsaiLog = JSON.stringify(curState);
     }
 };
 
@@ -268,7 +268,7 @@ function initEnv(){
         new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_py.jpg'), overdraw:0.5}),
         new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_my.jpg'), overdraw:0.5}),
         new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_pz.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mz.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mz.jpg'), overdraw:0.5})
     ];
     var skyBox = new THREE.Mesh(new THREE.BoxGeometry(30000,30000,30000,1,1,1),
         new THREE.MultiMaterial(skyMat));
