@@ -276,7 +276,7 @@ function main(){
 }
 
 function initEnv(){
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 25000);
     camera.position.z = 4000;
 
     scene = new THREE.Scene();
@@ -284,13 +284,22 @@ function initEnv(){
         scene.add(dog.object3D);
     });
     
-    // create sky dome ? 
+    // create sky dome ?
+    var geometry = new THREE.SphereGeometry(10000, 60, 40);
+    geometry.scale(-1, 1, 1);
+    var material = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load('img/skyDome.jpg')
+    });
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.z = 2000;
+    scene.add(mesh);
+
     // create universe background
-    mat = new THREE.ShaderMaterial(universeShader({side: THREE.FrontSide}));
-    background = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), mat);
-    background.position.z = -2000;
-    scene.add(background);
-    clock = new THREE.Clock();
+    // mat = new THREE.ShaderMaterial(universeShader({side: THREE.FrontSide}));
+    // background = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), mat);
+    // background.position.z = -2000;
+    // scene.add(background);
+    // clock = new THREE.Clock();
 
     css3DRenderer = new THREE.CSS3DRenderer();
     css3DRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -341,7 +350,7 @@ function animate(){
 }
 
 function render(){
-    mat.uniforms.time += clock.getDelta() / 1000;
+    //mat.uniforms.time += clock.getDelta() / 1000;
     css3DRenderer.render(scene, camera);
     webGLRenderer.render(scene, camera);
 }
