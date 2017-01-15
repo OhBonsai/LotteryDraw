@@ -7,6 +7,8 @@ body {
     margin: 0;
     font-family: Helvetica, sans-serif;
     overflow: hidden;
+    /*background: url('img/background.png') top center;*/
+    /*background-size:100% 100%;*/
 }
 
 #menu {
@@ -14,6 +16,15 @@ body {
     bottom: 20px;
     width: 100%;
     text-align: center;
+}
+
+#author {
+    position: absolute;
+    font-size: 20px;
+    top: 20px;
+    right: 10px;
+    width: 100%;
+    text-align: right;
 }
 
 
@@ -60,9 +71,9 @@ body {
 }
 
 button {
-    color: rgba(127,255,255,0.75);
+    color: rgba(0,127,255,0.75);
     background: transparent;
-    outline: 1px solid rgba(127,255,255,0.75);
+    outline: 1px solid rgba(255,0,127,0.75);
     border: 0px;
     padding: 5px 10px;
     cursor: pointer;
@@ -76,9 +87,9 @@ button:active {
 }
 
 input {
-    color: rgba(127,255,255,0.75);
+    color: rgba(0,127,255,0.75);
     background: transparent;
-    outline: 1px solid rgba(127,255,255,0.75);
+    outline: 1px solid rgba(255,0,127,0.75);
     border: 0px;
     padding: 5px 10px;
     cursor: pointer;
@@ -86,5 +97,5 @@ input {
 }
 
 span{
-    color: rgba(127,255,255,0.75);
+    color: rgba(0,127,255,0.75);
 }
