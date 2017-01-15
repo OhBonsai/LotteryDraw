@@ -5,7 +5,7 @@ html, body {
 body {
     background-color: #000000;
     margin: 0;
-    font-family: Helvetica, sans-serif;;
+    font-family: Helvetica, sans-serif;
     overflow: hidden;
 }
 
@@ -44,7 +44,7 @@ body {
     top: 40px;
     left: 0px;
     right: 0px;
-    font-size: 60px;
+    font-size: 30px;
     font-weight: bold;
     color: rgba(255,255,255,0.75);
     text-shadow: 0 0 10px rgba(0,255,255,0.95);
@@ -82,7 +82,7 @@ input {
     border: 0px;
     padding: 5px 10px;
     cursor: pointer;
-    width: 10px;
+    width: 15px;
 }
 
 span{
