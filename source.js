@@ -240,6 +240,7 @@ LuckyGroup.prototype = {
 
 
 var camera, scene, css3DRenderer, webGLRenderer;
+var background, clock, mat;
 var controls;
 var luckyGroup = new LuckyGroup(unLucky, newLucky, lucky);
 
@@ -251,31 +252,21 @@ function main(){
 }
 
 function initEnv(){
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
     camera.position.z = 4000;
 
     scene = new THREE.Scene();
     luckyGroup.unLuckyDogs.forEach(function(dog){
         scene.add(dog.object3D);
     });
-
-
-    // create sky dome
-    var loader = new THREE.TextureLoader();
-    var skyMat = [
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_px.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mx.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_py.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_my.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_pz.jpg'), overdraw:0.5}),
-        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mz.jpg'), overdraw:0.5})
-    ];
-    var skyBox = new THREE.Mesh(new THREE.BoxGeometry(30000,30000,30000,1,1,1),
-        new THREE.MultiMaterial(skyMat));
-    skyBox.scale.set(-1,1,1);
-    skyBox.rotation.order = 'XZY';
-    skyBox.renderDepth = 100.0;
-    scene.add(skyBox);
+    
+    // create sky dome ? 
+    // create universe background
+    mat = new THREE.ShaderMaterial(universeShader({side: THREE.FrontSide}));
+    background = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), mat);
+    background.position.z = -2000;
+    scene.add(background);
+    clock = new THREE.Clock();
 
     css3DRenderer = new THREE.CSS3DRenderer();
     css3DRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -322,6 +313,7 @@ function animate(){
 }
 
 function render(){
+    mat.uniforms.time += clock.getDelta() / 1000;
     css3DRenderer.render(scene, camera);
     webGLRenderer.render(scene, camera);
 }
