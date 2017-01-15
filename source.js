@@ -1,12 +1,12 @@
 /**
  * Created by bonsai on 1/14/17.
  */
-var LuckyDog = function(name, id, groupId){
+var LuckyDog = function(name, id, groupId, luckLevel){
     this.name = name;
     this.id = id;
     this.groupId = groupId;
     this.object3D = this.createCard(name, id, groupId);
-    this.luckyLevel = 0;
+    this.luckyLevel = luckLevel | 0;
 };
 
 LuckyDog.prototype = {
@@ -61,13 +61,13 @@ LuckyGroup.prototype = {
     initDogs: function(ul, nl, ly){
         var _this = this;
         ul.forEach(function(o){
-            _this.unLuckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
+            _this.unLuckyDogs.push(new LuckyDog(o[0], o[1], o[2], o[3]))
         });
         nl.forEach(function(o){
-            _this.newLuckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
+            _this.newLuckyDogs.push(new LuckyDog(o[0], o[1], o[2], o[3]))
         });
         ly.forEach(function(o){
-            _this.luckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
+            _this.luckyDogs.push(new LuckyDog(o[0], o[1], o[2], o[3]))
         })
     },
 
@@ -255,9 +255,9 @@ LuckyGroup.prototype = {
 
     logCurState: function(){
         var curState = {unLuckyDogs: [], luckyDogs: [], newLuckyDogs: []};
-        this.unLuckyDogs.forEach(function(dog){curState.unLuckyDogs.push([dog.name, dog.id, dog.groupId])});
-        this.luckyDogs.forEach(function(dog){curState.luckyDogs.push([dog.name, dog.id, dog.groupId])});
-        this.newLuckyDogs.forEach(function(dog){curState.newLuckyDogs.push([dog.name, dog.id, dog.groupId])});
+        this.unLuckyDogs.forEach(function(dog){curState.unLuckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
+        this.luckyDogs.forEach(function(dog){curState.luckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
+        this.newLuckyDogs.forEach(function(dog){curState.newLuckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
         window.localStorage.bonsaiLog = JSON.stringify(curState);
     }
 };
@@ -283,7 +283,13 @@ function initEnv(){
     luckyGroup.unLuckyDogs.forEach(function(dog){
         scene.add(dog.object3D);
     });
-    
+    luckyGroup.luckyDogs.forEach(function(dog){
+        scene.add(dog.object3D);
+    });
+    luckyGroup.newLuckyDogs.forEach(function(dog){
+        scene.add(dog.object3D);
+    });
+
     // create sky dome ?
     var geometry = new THREE.SphereGeometry(10000, 60, 40);
     geometry.scale(-1, 1, 1);
