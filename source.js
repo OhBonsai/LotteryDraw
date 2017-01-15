@@ -117,7 +117,10 @@ LuckyGroup.prototype = {
             this.toThreeShape()
         }
         this.isViewLevel = ! this.isViewLevel;
+    },
 
+    showUnDrawList: function(){
+        this.toSphereShape();
     },
 
     makeDogLucky: function(num, level){
@@ -216,6 +219,27 @@ LuckyGroup.prototype = {
         transform(this.unLuckyDogs, helixTargets, 2000);
     },
 
+    toSphereShape: function(){
+        this.luckyDogs.forEach(function(dog){dog.hide()});
+        this.newLuckyDogs.forEach(function(dog){dog.hide()});
+        this.unLuckyDogs.forEach(function(dog){dog.show()});
+
+        var sphereTargets = [];
+        this.unLuckyDogs.forEach(function(dog, idx, arr){
+            var phi = Math.acos(-1 + (2*idx)/arr.length);
+            var theta = Math.sqrt(arr.length * Math.PI) * phi;
+            var obj = new THREE.Object3D();
+            var radius = 800;
+
+            obj.position.x = radius *　Math.cos(theta) * Math.sin(phi);
+            obj.position.y = radius *　Math.sin(theta) * Math.sin(phi);
+            obj.position.z = radius * Math.cos( phi );
+            obj.lookAt(new THREE.Vector3(obj.position.x*2,obj.position.y*2,obj.position.z*2));
+
+            sphereTargets.push(obj)
+        });
+        transform(this.unLuckyDogs, sphereTargets, 2000);
+    },
 
     toRandom: function(){
         var randomTargets = [];
@@ -303,6 +327,10 @@ function initEvent(){
             luckyGroup.stopDraw();
         }
     }, false);
+
+    document.getElementById('un-draw-list').addEventListener('click', function(){
+        luckyGroup.showUnDrawList();
+    }, false);
 }
 
 
@@ -349,7 +377,3 @@ function onWindowResize(){
     webGLRenderer.setSize(window.innerWidth, window.innerHeight);
     render();
 }
-
-
-
-
