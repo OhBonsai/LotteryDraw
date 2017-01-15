@@ -40,7 +40,6 @@ LuckyDog.prototype = {
     hide: function(){
         document.getElementById(this.name).style.display = 'none';
         this.object3D.visible = false;
-        console.log(1);
     }
 };
 
@@ -82,7 +81,11 @@ LuckyGroup.prototype = {
         document.getElementById('chaos').innerHTML = '开始';
         window.clearInterval(this.chaosInterval);
         var drawNum = document.getElementById('draw-num').value ? document.getElementById('draw-num').value : 1;
-        var drawLevel = document.getElementById('draw-level').value ? document.getElementById('draw-level').value : 3;
+        var drawLevel = document.getElementById('draw-level').value ? parseInt(document.getElementById('draw-level').value) : 3;
+        if(3<drawLevel | drawLevel<1){
+            drawLevel = 3
+        }
+
         this.makeDogLucky(drawNum, drawLevel);
         // unlucky dogs array to helix as shell
         this.toHelixShape();
@@ -96,7 +99,7 @@ LuckyGroup.prototype = {
             this.toGroupShape()
         }else{
             document.getElementById('draw-list').innerHTML = '分组浏览';
-            this.toGroupShape()
+            this.toThreeShape()
         }
         this.isViewLevel = ! this.isViewLevel;
 
@@ -107,6 +110,7 @@ LuckyGroup.prototype = {
         this.luckyDogs = this.luckyDogs.concat(this.newLuckyDogs);
         this.newLuckyDogs = [];
 
+        if(num > this.unLuckyDogs.length) num = this.unLuckyDogs.length;
         for(var i=0; i<num; i++) {
             var luckNum = parseInt(Math.random() * this.unLuckyDogs.length);
             this.newLuckyDogs.push(this.unLuckyDogs[luckNum]);
@@ -145,15 +149,15 @@ LuckyGroup.prototype = {
         var threeTarget = [];
         this.luckyDogs.forEach(function(dog){
             var obj = new THREE.Object3D();
-            var curIndex = levelMark[dog.luckyLevel]++;
+            var curIndex = levelMark[dog.luckyLevel - 1]++;
             obj.position.x = (curIndex%20)*WIDTH - 1260;
-            obj.position.y = parseInt(curIndex/20)*HEIGHT - 1000;
+            obj.position.y = - parseInt(curIndex/20)*HEIGHT + 800;
             threeTarget.push(obj)
         });
 
         //adjust Y value by level
-        var level2YAttach = (levelMark[0] / 10 + 1) * HEIGHT + 180;
-        var level3YAttach = (levelMark[0] / 10 + 1 + levelMark[1] / 10 + 1) * HEIGHT + 180;
+        var level2YAttach = - (levelMark[0] / 10 + 1) * HEIGHT - 300;
+        var level3YAttach = - (levelMark[0] / 10 + 1 + levelMark[1] / 10 + 1) * HEIGHT - 600;
 
         this.luckyDogs.forEach(function(dog, idx){
             var obj = threeTarget[idx];
@@ -168,7 +172,7 @@ LuckyGroup.prototype = {
         var rectangleTargets = [];
         this.newLuckyDogs.forEach(function(dog, idx, arr){
             var obj = new THREE.Object3D();
-            obj.position.x = -arr.length*WIDTH/2 + WIDTH + (idx%10)*WIDTH;
+            obj.position.x = -10*WIDTH/2 + WIDTH + (idx%10)*WIDTH;
             obj.position.y = parseInt(idx/11) * HEIGHT;
             obj.position.z = 2500;
             rectangleTargets.push(obj)
@@ -251,7 +255,7 @@ function initEvent(){
     window.addEventListener('resize', onWindowResize, false);
 
     document.getElementById('draw-list').addEventListener('click', function(){
-        //luckyGroup.showDrawList();
+        luckyGroup.showDrawList();
     }, false);
 
     document.getElementById('chaos').addEventListener('click', function(){
