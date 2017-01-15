@@ -43,7 +43,7 @@ LuckyDog.prototype = {
     }
 };
 
-var LuckyGroup = function(d){
+var LuckyGroup = function(ul, nl, ly){
     this.inChaos = false;
     this.chaosInterval = null;
 
@@ -52,37 +52,52 @@ var LuckyGroup = function(d){
     this.newLuckyDogs = [];
     this.luckyDogs = [];
     this.unLuckyDogs = [];
-    this.initDogs(d);
+    this.initDogs(ul, nl, ly);
 };
 
 LuckyGroup.prototype = {
     constructor: LuckyGroup,
 
-    initDogs: function(d){
+    initDogs: function(ul, nl, ly){
         var _this = this;
-        d.forEach(function(o){
+        ul.forEach(function(o){
             _this.unLuckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
+        });
+        nl.forEach(function(o){
+            _this.newLuckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
+        });
+        ly.forEach(function(o){
+            _this.luckyDogs.push(new LuckyDog(o[0], o[1], o[2]))
         })
     },
 
     startDraw: function(){
+        // log current state when start draw
+        this.logCurState();
+
         this.luckyDogs.forEach(function(dog){dog.hide()});
         this.unLuckyDogs.forEach(function(dog){dog.show()});
+
         document.getElementById('chaos').innerHTML = '结束';
         document.getElementById('draw-list').innerHTML = '中奖名单';
+
         this.toRandom();
-        var _this = this;
+
         //dirty code, *this* in setInterval refer to windows. It can be avoid only when using ES6
+        var _this = this;
         var doChaos = function(){_this.toRandom()};
         this.chaosInterval = self.setInterval(doChaos,2000);
     },
 
     stopDraw: function(){
+        this.logCurState();
+
         document.getElementById('chaos').innerHTML = '开始';
         window.clearInterval(this.chaosInterval);
+
         var drawNum = document.getElementById('draw-num').value ? document.getElementById('draw-num').value : 1;
         var drawLevel = document.getElementById('draw-level').value ? parseInt(document.getElementById('draw-level').value) : 3;
-        if(3<drawLevel | drawLevel<1){
+        if(3<drawLevel || drawLevel<1){
             drawLevel = 3
         }
 
@@ -170,7 +185,7 @@ LuckyGroup.prototype = {
 
     toRectangleShape: function(){
         var rectangleTargets = [];
-        this.newLuckyDogs.forEach(function(dog, idx, arr){
+        this.newLuckyDogs.forEach(function(dog, idx){
             var obj = new THREE.Object3D();
             obj.position.x = -10*WIDTH/2 + WIDTH + (idx%10)*WIDTH;
             obj.position.y = parseInt(idx/11) * HEIGHT;
@@ -212,13 +227,21 @@ LuckyGroup.prototype = {
             randomTargets.push(obj)
         });
         transform(this.unLuckyDogs, randomTargets, 2000);
+    },
+
+    logCurState: function(){
+        var curState = {unLuckyDogs: [], luckyDogs: [], newLuckyDogs: []};
+        this.unLuckyDogs.forEach(function(dog){curState.unLuckyDogs.push([dog.name, dog.id, dog.groupId])});
+        this.luckyDogs.forEach(function(dog){curState.luckyDogs.push([dog.name, dog.id, dog.groupId])});
+        this.newLuckyDogs.forEach(function(dog){curState.newLuckyDogs.push([dog.name, dog.id, dog.groupId])});
+        console.log(JSON.stringify(curState))
     }
 };
 
 
-var camera, scene, renderer;
+var camera, scene, css3DRenderer, webGLRenderer;
 var controls;
-var luckyGroup = new LuckyGroup(data);
+var luckyGroup = new LuckyGroup(unLucky, newLucky, lucky);
 
 main();
 
@@ -228,7 +251,7 @@ function main(){
 }
 
 function initEnv(){
-    camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
     camera.position.z = 4000;
 
     scene = new THREE.Scene();
@@ -236,12 +259,35 @@ function initEnv(){
         scene.add(dog.object3D);
     });
 
-    renderer = new THREE.CSS3DRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.domElement.style.position = 'absolute';
-    document.getElementById('container').appendChild(renderer.domElement);
 
-    controls = new THREE.TrackballControls(camera, renderer.domElement);
+    // create sky dome
+    var loader = new THREE.TextureLoader();
+    var skyMat = [
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_px.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mx.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_py.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_my.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_pz.jpg'), overdraw:0.5}),
+        new THREE.MeshBasicMaterial({map: loader.load('textures/tycho2t3_80_mz.jpg'), overdraw:0.5}),
+    ];
+    var skyBox = new THREE.Mesh(new THREE.BoxGeometry(30000,30000,30000,1,1,1),
+        new THREE.MultiMaterial(skyMat));
+    skyBox.scale.set(-1,1,1);
+    skyBox.rotation.order = 'XZY';
+    skyBox.renderDepth = 100.0;
+    scene.add(skyBox);
+
+    css3DRenderer = new THREE.CSS3DRenderer();
+    css3DRenderer.setSize(window.innerWidth, window.innerHeight);
+    css3DRenderer.domElement.style.position = 'absolute';
+    document.getElementById('container').appendChild(css3DRenderer.domElement);
+
+    webGLRenderer = new THREE.WebGLRenderer();
+    webGLRenderer.sortObjects = false;
+    webGLRenderer.autoClear = false;
+    document.getElementById('container').appendChild(webGLRenderer.domElement);
+
+    controls = new THREE.TrackballControls(camera, css3DRenderer.domElement);
     controls.rotateSpeed = 0.5;
     controls.minDistance = 500;
     controls.maxDistance = 6000;
@@ -276,7 +322,8 @@ function animate(){
 }
 
 function render(){
-    renderer.render(scene, camera);
+    css3DRenderer.render(scene, camera);
+    webGLRenderer.render(scene, camera);
 }
 
 
@@ -306,7 +353,8 @@ function transform(unLuckyDogs, targets, duration, isNotClear){
 function onWindowResize(){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    css3DRenderer.setSize(window.innerWidth, window.innerHeight);
+    webGLRenderer.setSize(window.innerWidth, window.innerHeight);
     render();
 }
 
