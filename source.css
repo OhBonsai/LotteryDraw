@@ -3,12 +3,11 @@ html, body {
 }
 
 body {
-    background-color: #000000;
     margin: 0;
     font-family: Helvetica, sans-serif;
     overflow: hidden;
-    /*background: url('img/background.png') top center;*/
-    /*background-size:100% 100%;*/
+    background: url(img/bg.png) top center;
+    background-size:100% 100%;
 }
 
 #menu {
