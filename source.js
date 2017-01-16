@@ -1,9 +1,45 @@
 /**
- * Created by bonsai on 1/14/17.
+ * Created by Bonsai on 17-1-16.
  */
+var WIDTH = 140;
+var HEIGHT = 180;
+
+
+var group, groupColors, groupLength;
+var unLucky, newLucky, lucky;
+var LEVEL;
+
+
+var camera, scene, css3DRenderer, webGLRenderer;
+var mesh;
+var controls;
+var luckyGroup;
+
+document.getElementById('file').addEventListener('change', function(event){
+    document.getElementById('notice').style.display = 'none';
+    var configFile = event.target.files[0];
+    var reader = new FileReader();
+    reader.onloadend = function(evt) {
+        if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+            var config = loadConfig(evt.target.result);
+            unLucky = config.unlucky;
+            newLucky = [];
+            lucky = [];
+            group = config.group;
+            LEVEL = config.level;
+            groupColors = config.groupColors;
+            luckyGroup = new LuckyGroup(unLucky, newLucky, lucky);
+
+            main()
+        }
+    };
+    reader.readAsText(configFile);
+},false);
+
+
 var LuckyDog = function(name, id, groupId, luckLevel){
     this.name = name;
-    this.id = id;
+    this.id = parseInt(id);
     this.groupId = groupId;
     this.object3D = this.createCard(name, id, groupId);
     this.luckyLevel = luckLevel | 0;
@@ -13,13 +49,15 @@ LuckyDog.prototype = {
     constructor: LuckyDog,
     createCard: function(){
         var card = document.createElement('div');
-        card.id = this.name;
+        card.id = this.id;
         card.className = 'card';
-        card.style.backgroundColor = groupColor[this.groupId] + 1 + ')';
+        card.style.backgroundColor = 'rgba(' + groupColors[this.groupId] + 1 + ')';
 
         var myName = document.createElement('div');
         myName.className = 'name';
         myName.textContent = this.name;
+        var cardBgColor = groupColors[this.groupId].split(',').slice(0,3);
+        myName.style.color = 'rgba(' + '0,' + (parseInt(cardBgColor[1])/2) + ',' + (parseInt(cardBgColor[1])*2%255) + ',1)';
         card.appendChild(myName);
 
         var info = document.createElement('div');
@@ -34,11 +72,11 @@ LuckyDog.prototype = {
         return curObj;
     },
     show: function(){
-        document.getElementById(this.name).style.display = '';
+        document.getElementById(this.id).style.display = '';
         this.object3D.visible = true;
     },
     hide: function(){
-        document.getElementById(this.name).style.display = 'none';
+        document.getElementById(this.id).style.display = 'none';
         this.object3D.visible = false;
     }
 };
@@ -97,8 +135,8 @@ LuckyGroup.prototype = {
 
         var drawNum = document.getElementById('draw-num').value ? document.getElementById('draw-num').value : 1;
         var drawLevel = document.getElementById('draw-level').value ? parseInt(document.getElementById('draw-level').value) : 3;
-        if(3<drawLevel || drawLevel<1){
-            drawLevel = 3
+        if(LEVEL<drawLevel || drawLevel<1){
+            drawLevel = LEVEL
         }
 
         this.makeDogLucky(drawNum, drawLevel);
@@ -114,7 +152,7 @@ LuckyGroup.prototype = {
             this.toGroupShape()
         }else{
             document.getElementById('draw-list').innerHTML = '分组浏览';
-            this.toThreeShape()
+            this.toLevelShape()
         }
         this.isViewLevel = ! this.isViewLevel;
     },
@@ -143,47 +181,53 @@ LuckyGroup.prototype = {
         this.newLuckyDogs = [];
         this.luckyDogs.forEach(function(dog){dog.show()});
 
-        var groupMark = [0, 0, 0, 0, 0, 0];
+        var groupMark = [];
+        for(var i=0; i<=groupLength; i++){
+            groupMark[i] = [0]
+        }
         var groupTarget = [];
         this.luckyDogs.forEach(function(dog){
             var obj = new THREE.Object3D();
             var curIndex = groupMark[dog.groupId]++;
-            var curGrid = dog.groupId;
             obj.position.x = (curIndex%20)*WIDTH - 1260;
-            obj.position.y = curGrid*600 - parseInt(curIndex/20)*HEIGHT - 1000;
+            // obj.position.y = dog.groupId*HEIGHT - parseInt(curIndex/20)*HEIGHT - 1000;
+            obj.position.y = dog.groupId * (HEIGHT) - 1000;
             groupTarget.push(obj)
         });
         transform(this.luckyDogs, groupTarget, 2000, true);
     },
 
-    toThreeShape: function(){
+    toLevelShape: function(){
         this.unLuckyDogs.forEach(function(dog){dog.hide()});
         this.luckyDogs = this.luckyDogs.concat(this.newLuckyDogs);
         this.newLuckyDogs = [];
         this.luckyDogs.forEach(function(dog){dog.show()});
 
         //record how many dog of level
-        var levelMark = [0, 0, 0];
-        var threeTarget = [];
+        var levelMark = [];
+        for(var i=0; i<LEVEL; i++){
+            levelMark[i] = 0
+        }
+        var levelTarget = [];
         this.luckyDogs.forEach(function(dog){
             var obj = new THREE.Object3D();
             var curIndex = levelMark[dog.luckyLevel - 1]++;
             obj.position.x = (curIndex%20)*WIDTH - 1260;
             obj.position.y = - parseInt(curIndex/20)*HEIGHT + 800;
-            threeTarget.push(obj)
+            levelTarget.push(obj)
         });
 
         //adjust Y value by level
-        var level2YAttach = - (levelMark[0] / 10 + 1) * HEIGHT - 300;
-        var level3YAttach = - (levelMark[0] / 10 + 1 + levelMark[1] / 10 + 1) * HEIGHT - 600;
+        var yAttach = [0];
+        for(i=1; i<LEVEL; i++){
+            yAttach[i] = -parseInt(levelMark[i-1] / 10)*HEIGHT - 150 + yAttach[i-1];
+        }
 
         this.luckyDogs.forEach(function(dog, idx){
-            var obj = threeTarget[idx];
-            if(dog.luckyLevel == 2) obj.position.y += level2YAttach;
-            if(dog.luckyLevel == 3) obj.position.y += level3YAttach;
+            levelTarget[idx].position.y += yAttach[dog.luckyLevel-1];
         });
 
-        transform(this.luckyDogs, threeTarget, 2000, true);
+        transform(this.luckyDogs, levelTarget, 2000, true);
     },
 
     toRectangleShape: function(){
@@ -258,17 +302,10 @@ LuckyGroup.prototype = {
         this.unLuckyDogs.forEach(function(dog){curState.unLuckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
         this.luckyDogs.forEach(function(dog){curState.luckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
         this.newLuckyDogs.forEach(function(dog){curState.newLuckyDogs.push([dog.name, dog.id, dog.groupId, dog.luckyLevel])});
+        curState.group = group;
         window.localStorage.bonsaiLog = JSON.stringify(curState);
     }
 };
-
-
-var camera, scene, css3DRenderer, webGLRenderer;
-var background, clock, mat;
-var controls;
-var luckyGroup = new LuckyGroup(unLucky, newLucky, lucky);
-
-main();
 
 function main(){
     initEnv();
@@ -294,18 +331,11 @@ function initEnv(){
     var geometry = new THREE.SphereGeometry(10000, 60, 40);
     geometry.scale(-1, 1, 1);
     var material = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load('img/skyDome.jpg')
+        map: new THREE.TextureLoader().load('img/xihu.jpg')
     });
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.z = 2000;
     scene.add(mesh);
-
-    // create universe background
-    // mat = new THREE.ShaderMaterial(universeShader({side: THREE.FrontSide}));
-    // background = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), mat);
-    // background.position.z = -2000;
-    // scene.add(background);
-    // clock = new THREE.Clock();
 
     css3DRenderer = new THREE.CSS3DRenderer();
     css3DRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -391,4 +421,54 @@ function onWindowResize(){
     css3DRenderer.setSize(window.innerWidth, window.innerHeight);
     webGLRenderer.setSize(window.innerWidth, window.innerHeight);
     render();
+}
+
+
+function loadConfig(configText){
+    var level = parseInt(configText.split(';')[0].trim());
+    var sourceData = configText.split(';')[1].trim().split(',');
+    //if last letter is ','
+    if(sourceData[sourceData.length-1].trim() == ''){
+        sourceData = sourceData.slice(0, sourceData.length-1)
+    }
+
+    var result = [];
+    for(var i=0; i<sourceData.length; i++){
+        //split attr by '|'
+        var o = sourceData[i].trim().split('|');
+        //if file is divided by space
+        if(o.length!=3){
+            console.log(o + 'format error');
+            continue;
+        }
+        result.push(o)
+    }
+
+    var groups = [];
+    //filter all group
+    result.forEach(function(one){
+        if(groups.indexOf(one[2])<0){
+            groups.push(one[2]);
+        }
+    });
+
+    // change group to group id
+    result.forEach(function(one){
+        one[2] = groups.indexOf(one[2]);
+    });
+
+    // generate random group color
+    var groupColors = [];
+    groups.forEach(function(){
+        groupColors.push(parseInt(Math.random()*255)+','+parseInt(Math.random()*255)+','+parseInt(Math.random()*255)+',' );
+    });
+
+    return {
+        level: level,
+        unlucky: result,
+        group: groups,
+        groupLength: groups.length,
+        groupColors: groupColors
+    }
+
 }
