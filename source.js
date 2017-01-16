@@ -28,6 +28,7 @@ document.getElementById('file').addEventListener('change', function(event){
             group = config.group;
             LEVEL = config.level;
             groupColors = config.groupColors;
+            groupLength = config.groupLength;
             luckyGroup = new LuckyGroup(unLucky, newLucky, lucky);
 
             main()
